@@ -8,13 +8,10 @@ class SessionCubit extends Cubit<SessionState> {
 
   SessionCubit(this.sessionRepository) : super(SessionInitial());
 
-  Future<Object> getUserCalendar() async {
+  Future<void> getUserCalendar() async {
     var response = await sessionRepository.getUserCalendar();
     if (response.success) {
       emit(SessionsLoaded(response.data!));
-      return response.data!;
-    } else {
-      return {};
     }
   }
 }

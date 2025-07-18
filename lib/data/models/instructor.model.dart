@@ -1,3 +1,4 @@
+import 'package:elbaraa/data/models/session.model.dart';
 import 'package:elbaraa/data/models/unavailableTime.model.dart';
 
 class Instructor {
@@ -11,6 +12,7 @@ class Instructor {
   final String gender;
   final String jobTitle;
   final List<UnavailableTime> unavailableTimes;
+  final List<Session> sessions;
 
   Instructor({
     required this.id,
@@ -23,6 +25,7 @@ class Instructor {
     required this.gender,
     required this.jobTitle,
     required this.unavailableTimes,
+    required this.sessions,
   });
 
   factory Instructor.fromJson(Map<String, dynamic> json) {
@@ -40,6 +43,10 @@ class Instructor {
               ?.map((e) => UnavailableTime.fromJson(e))
               .toList() ??
           [],
+      sessions: (json['sessions'] as List<dynamic>?)
+             ?.map((e) => Session.fromJson(e))
+             .toList() ??
+         [],    
     );
   }
 
@@ -54,5 +61,6 @@ class Instructor {
         'gender': gender,
         'jobTitle': jobTitle,
         'unavailableTimes': unavailableTimes.map((e) => e.toJson()).toList(),
+        'sessions': sessions.map((e) => e.toJson()).toList(),
       };
 }

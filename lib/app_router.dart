@@ -153,6 +153,7 @@ class AppRouter {
             providers: [
               BlocProvider.value(value: planCubit),
               BlocProvider.value(value: instructorCubit),
+              BlocProvider.value(value: sessionCubit),
             ],
             child: SupscripToPlanScreen(planId: planId),
           ),

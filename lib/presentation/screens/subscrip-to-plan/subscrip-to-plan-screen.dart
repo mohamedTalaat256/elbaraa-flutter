@@ -3,16 +3,19 @@ import 'package:elbaraa/data/business_logic/instructor/instructor_cubit.dart';
 import 'package:elbaraa/data/business_logic/instructor/instructor_state.dart';
 import 'package:elbaraa/data/business_logic/plan/plan_cubit.dart';
 import 'package:elbaraa/data/business_logic/plan/plan_state.dart';
+import 'package:elbaraa/data/business_logic/session/session_cubit.dart';
+import 'package:elbaraa/data/business_logic/session/session_state.dart';
 import 'package:elbaraa/data/models/UnavalableTimeDataSource.dart';
 import 'package:elbaraa/data/models/instructor.model.dart';
 import 'package:elbaraa/data/models/material.model.dart';
 import 'package:elbaraa/data/models/meeting.model.dart';
 import 'package:elbaraa/data/models/plan.model.dart';
+import 'package:elbaraa/data/models/session.model.dart';
 import 'package:elbaraa/data/models/unavailableTime.model.dart';
 import 'package:elbaraa/presentation/widgets/custome_text.dart';
+import 'package:elbaraa/utils/Calendar.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:localization/localization.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -29,14 +32,17 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
   late Plan plan;
   late List<MaterialModel> materials = [];
   late List<Instructor> instructors = [];
+  late List<Session> studentSessions = [];
   late List<Meeting> events = [];
-  late List<Appointment> unavailableTimes = [];
+  late List<UnavailableTime> unavailableTimes = [];
+  late List<Session> instructorSessions = [];
   Set<int> selectedMaterial = {};
   Set<int> selectedInstructor = {};
   @override
   void initState() {
     super.initState();
     BlocProvider.of<PlanCubit>(context).findById(widget.planId);
+    BlocProvider.of<SessionCubit>(context).getUserCalendar();
   }
 
   int _index = 0;
@@ -84,28 +90,7 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
               steps: <Step>[
                 _buildFirstStep(context, visibleMaterials),
                 _buildSecondStep(context),
-                Step(
-                  title: Text('sessions'.i18n()),
-                  content:  SizedBox(
-        height: MediaQuery.of(context).size.height * 0.72, child :SfCalendar(
-                    view: CalendarView.week,
-                    headerStyle: CalendarHeaderStyle(
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                    ),
-                    dataSource: UnavalableTimeDataSource(unavailableTimes),
-                    monthViewSettings: const MonthViewSettings(
-                      appointmentDisplayMode:
-                          MonthAppointmentDisplayMode.appointment,
-                    ),
-                    onTap: (CalendarTapDetails details) {
-                      /*  if (details.targetElement ==
-                          CalendarElement.calendarCell) {
-                        final DateTime selectedDate = details.date!;
-                        _showAddEventDialog(context, selectedDate);
-                      } */
-                    },
-                  )),
-                ),
+                _buildCalendarStep(context),
                 Step(
                   title: Text('save'.i18n()),
                   content: Text('Content for Step 2'),
@@ -117,6 +102,63 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
           return Scaffold(body: Center(child: Text('loading')));
         }
       },
+    );
+  }
+
+  Step _buildCalendarStep(BuildContext context) {
+    return Step(
+      title: Text('sessions'.i18n()),
+      content: BlocBuilder<SessionCubit, SessionState>(
+        builder: (context, state) {
+          if (state is SessionsLoaded) {
+            studentSessions = state.sessions;
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.72,
+              child: SfCalendar(
+                view: CalendarView.week,
+                firstDayOfWeek: 5,
+                dataSource: UnavalableTimeDataSource(
+                  mergeAllEvents(
+                    studentSessions,
+                    instructorSessions,
+                    unavailableTimes,
+                  )),
+                
+                appointmentBuilder: (context, details) {
+                  final Appointment appointment = details.appointments.first;
+                  return Container(
+                    width: double
+                        .infinity, // This will apply within its allocated resource column
+                    decoration: BoxDecoration(
+                      color: appointment.color,
+                      borderRadius: BorderRadius.circular(0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        appointment.subject,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          } else {
+            return Text("loading");
+          }
+        },
+      ),
     );
   }
 
@@ -172,19 +214,10 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
                                           );
                                         }
                                         if (selectedInstructor.isNotEmpty) {
-                                          print(
-                                            instructor
-                                                .unavailableTimes
-                                                .first
-                                                .day,
-                                          );
-                                          unavailableTimes = modifyListTimesAfterChangeTimeZoneUnavailableTimes(instructor.unavailableTimes);
-                                          
-                                          /*  BlocProvider.of<InstructorCubit>(
-                                            context,
-                                          ).getActiveInstructorByMaterialI(
-                                            selectedMaterial.first,
-                                          ); */
+                                          unavailableTimes =
+                                              instructor.unavailableTimes;
+                                          instructorSessions =
+                                              instructor.sessions;
                                         }
                                       });
                                     },
@@ -301,29 +334,5 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
         ),
       ),
     );
-  }
-
-  List<Appointment> modifyListTimesAfterChangeTimeZoneUnavailableTimes(
-    List<UnavailableTime> list,
-  ) {
-    return list.map((event) {
-      final DateTime localStart = event.start.toLocal();
-      final DateTime localEnd = event.end.toLocal();
-      final String weekday = event.day
-          .substring(0, 2)
-          .toUpperCase();
-          
-      final String formattedStart = Jiffy.parseFromDateTime(localStart)
-      .format(pattern: "yyyyMMdd'T'HHmmss");
-      return Appointment(
-        id: event.id,
-        subject: event.id.toString(),
-        color: Colors.red,
-        startTime: localStart,
-        endTime: localEnd,
-        notes: 'Discuss quarterly earnings',
-        recurrenceRule: 'FREQ=WEEKLY;BYDAY=$weekday;DTSTART=$formattedStart',
-      );
-    }).toList();
   }
 }

@@ -15,11 +15,11 @@ class ControlView extends StatefulWidget {
 class _ControlViewState extends State<ControlView> {
   PageController pageController = PageController();
   List<Widget> screens = [
-      CalendarScreen(),
-    HomeScreen(),
-  
+      ProfileScreen(),
+   
+   CalendarScreen(),
     MessagesScreen(),
-    ProfileScreen(),
+    HomeScreen(),
   ];
 
   int selectedIndex = 0;

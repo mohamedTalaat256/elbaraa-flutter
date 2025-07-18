@@ -18,4 +18,9 @@ class SessionsLoaded extends SessionState {
 }
 
 
+class AuthStudentSessionsLoaded extends SessionState {
+  final List<Session> sessions;
+  AuthStudentSessionsLoaded(this.sessions);
+}
+
  

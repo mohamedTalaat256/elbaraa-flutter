@@ -1,212 +1,147 @@
-import 'package:elbaraa/data/business_logic/session/session_cubit.dart';
-import 'package:elbaraa/data/business_logic/session/session_state.dart';
-import 'package:elbaraa/data/models/MeetingDataSource.dart';
-import 'package:elbaraa/data/models/meeting.model.dart';
-import 'package:elbaraa/data/models/session.model.dart';
+import 'package:elbaraa/presentation/screens/calendar/data/event.dart';
+import 'package:elbaraa/presentation/screens/calendar/widgets/calendar_widget.dart';
+import 'package:elbaraa/presentation/screens/calendar/widgets/overlay_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
-import 'package:localization/localization.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:kalender/kalender.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
+
+  static _CalendarScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_CalendarScreenState>();
+
+  static EventsController<Event> eventsController(BuildContext context) =>
+      of(context)!.eventsController;
+  static List<ViewConfiguration> views(BuildContext context) =>
+      of(context)!.viewConfigurations;
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  final CalendarController _calendarController = CalendarController();
+  final eventsController = DefaultEventsController<Event>();
 
-  @override
-  void initState() {
-    super.initState();
-    BlocProvider.of<SessionCubit>(context).getUserCalendar();
-    _calendarController.view = CalendarView.week; // default view
-  }
+  final controller1 = CalendarController<Event>();
+  late final viewConfiguration1 = ValueNotifier(viewConfigurations[1]);
 
-  late List<Meeting> _meetings = [];
-  final ValueNotifier<int> _tabIndexBasicToggleCounter = ValueNotifier(1);
-  final CalendarView _calendarView = CalendarView.week;
-  late final _listTextTabToggleCounter = [
-    DataTab(
-      title: "today".i18n(),
-      counterWidget: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Colors.red,
-            shape: BoxShape.circle,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Text(
-              "1",
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    ),
-    DataTab(title: "week".i18n()),
-    DataTab(title: "month".i18n()),
+  final viewConfigurations = [
+    MultiDayViewConfiguration.singleDay(),
+    MultiDayViewConfiguration.week(),
+    MultiDayViewConfiguration.custom(numberOfDays: 3),
+    MonthViewConfiguration.singleMonth(),
   ];
+
+  late final callbacks = CalendarCallbacks<Event>(
+    onEventTapped: (event, renderBox) => createOverlay(event, renderBox),
+    onEventCreate: (event) => event.copyWith(data: const Event(title: 'New Event')),
+    onEventCreated: (event) => eventsController.addEvent(event),
+    onTapped: (date) {
+      eventsController.addEvent(
+        CalendarEvent(
+          dateTimeRange: DateTimeRange(
+            start: date,
+            end: date.add(const Duration(hours: 1)),
+          ),
+          data: const Event(title: 'New Event'),
+        ),
+      );
+    },
+    onMultiDayTapped: (dateRange) {
+      eventsController.addEvent(
+        CalendarEvent(
+          dateTimeRange: dateRange,
+          data: const Event(title: 'New Event'),
+        ),
+      );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SessionCubit, SessionState>(
-      builder: (context, state) {
-        if (state is SessionsLoaded) {
-          _convertSessionsToMeetings(state.sessions);
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("week_calendar".i18n()),
-              elevation: 0,
-              backgroundColor: Colors.white,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Kalender Demo"),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+        elevation: 2,
+        actions: [
+          /*  IconButton.filledTonal(
+            onPressed: () => CalendarScreen.of(context)!.toggleTheme(),
+            icon: Icon(
+              CalendarScreen.of(context)!.themeMode == ThemeMode.dark ? Icons.brightness_2_rounded : Icons.brightness_7_rounded,
             ),
-            body: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: 8,
-                  ),
-                  child: _basicTabToggleWithCounter(),
-                ),
-                Expanded(
-                  child: SfCalendar(
-                    controller: _calendarController,
-                    view: _calendarView,
-                    headerStyle: CalendarHeaderStyle(
-                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                    ),
-                    dataSource: MeetingDataSource(_meetings),
-                    monthViewSettings: const MonthViewSettings(
-                      appointmentDisplayMode:
-                          MonthAppointmentDisplayMode.appointment,
-                    ),
-                    onTap: (CalendarTapDetails details) {
-                      if (details.targetElement ==
-                          CalendarElement.calendarCell) {
-                        final DateTime selectedDate = details.date!;
-                        _showAddEventDialog(context, selectedDate);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Text("data");
-        }
-      },
-    );
-  }
-
-  void _convertSessionsToMeetings(List<Session> sessions) {
-    _meetings = sessions.map((session) {
-      return Meeting(
-        session.subscription!.plan!.title,
-        DateTime.parse(session.start!),
-        DateTime.parse(session.end!),
-        false
-      );
-    }).toList();
-  }
-
-  void _showAddEventDialog(BuildContext context, DateTime selectedDate) {
-    final TextEditingController _titleController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Add Event"),
-          content: TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Event Title'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                final newMeeting = Meeting(
-                  _titleController.text,
-                  selectedDate,
-                  selectedDate.add(const Duration(hours: 1)),
-                  false
-                );
-
-                setState(() {
-                  _meetings.add(newMeeting);
-                });
-
-                Navigator.pop(context);
-              },
-              child: Text('save'.i18n()),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('close'.i18n()),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _basicTabToggleWithCounter() => Column(
-    children: [
-      ValueListenableBuilder(
-        valueListenable: _tabIndexBasicToggleCounter,
-        builder: (context, currentIndex, _) {
-          return FlutterToggleTab(
-            width: 90,
-            borderRadius: 30,
-            height: 40,
-            selectedIndex: currentIndex,
-            selectedBackgroundColors: const [Colors.blue, Colors.blueAccent],
-            selectedTextStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-            unSelectedTextStyle: const TextStyle(
-              color: Colors.black87,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            dataTabs: _listTextTabToggleCounter,
-            selectedLabelIndex: (index) {
-              _tabIndexBasicToggleCounter.value = index;
-              _tabIndexBasicToggleCounter.value = index;
-              setState(() {
-                switch (index) {
-                  case 0:
-                    _calendarController.view = CalendarView.day;
-                    break;
-                  case 1:
-                    _calendarController.view = CalendarView.week;
-                    break;
-                  case 2:
-                    _calendarController.view = CalendarView.month;
-                    break;
-                }
-                print(_calendarView);
-              });
-            },
-
-            isScroll: false,
-          );
-        },
+          ), */
+        ],
       ),
-    ],
-  );
+      body: OverlayPortal(
+        controller: portalController,
+        overlayChildBuilder: buildOverlay,
+        child: CalendarWidget(
+          controller: controller1,
+          view: viewConfiguration1,
+          callbacks: callbacks,
+        ),
+      ),
+    );
+  }
+
+  BuildContext get context;
+
+  final portalController = OverlayPortalController();
+  CalendarEvent<Event>? selectedEvent;
+  RenderBox? selectedRenderBox;
+
+  void createOverlay(CalendarEvent<Event> event, RenderBox renderBox) {
+    selectedEvent = event;
+    selectedRenderBox = renderBox;
+    portalController.show();
+  }
+
+  Widget buildOverlay(BuildContext overlayContext) {
+    var position = selectedRenderBox!.localToGlobal(Offset.zero);
+    const height = 230.0;
+    const width = 300.0;
+
+    final size = MediaQuery.sizeOf(context);
+
+    if (position.dy + height > size.height) {
+      position = position.translate(
+        0,
+        size.height - (position.dy + height) - 25,
+      );
+    } else if (position.dy < 0) {
+      position = position.translate(0, -position.dy);
+    }
+
+    if (position.dx + width + selectedRenderBox!.size.width > size.width) {
+      position = position.translate(-width - 16, 0);
+    } else {
+      position = position.translate(selectedRenderBox!.size.width, 0);
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: portalController.hide,
+          ),
+        ),
+        Positioned(
+          top: position.dy,
+          left: position.dx,
+          child: OverlayCard(
+            event: selectedEvent!,
+            position: position,
+            height: height,
+            width: width,
+            onDismiss: portalController.hide,
+            eventsController: eventsController,
+          ),
+        ),
+      ],
+    );
+  }
 }
-
-

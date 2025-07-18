@@ -23,4 +23,10 @@ class UnavailableTime {
       'end': end.toIso8601String(),
     };
   }
+
+
+   @override
+  String toString() {
+    return '{id: $id, day: $day, start: $start, end: $end}\n';
+  }
 }
