@@ -100,7 +100,7 @@ class _CalendarCustomizeState extends State<CalendarCustomize> {
       initiallyExpanded: true,
       childrenPadding: childrenPadding,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
       ),
       children: [
         timeOfDayRange,
@@ -206,7 +206,7 @@ class _CalendarCustomizeState extends State<CalendarCustomize> {
       initiallyExpanded: true,
       childrenPadding: childrenPadding,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
       ),
       children: [
         showMultiDayEvents,
@@ -289,7 +289,7 @@ class _CalendarCustomizeState extends State<CalendarCustomize> {
       initiallyExpanded: true,
       childrenPadding: childrenPadding,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
       ),
       children: [
         showHeader,
@@ -488,7 +488,7 @@ class SwitchTileEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile.adaptive(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
       ),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,

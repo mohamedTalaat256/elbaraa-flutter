@@ -5,8 +5,8 @@ import 'package:elbaraa/presentation/screens/calendar/widgets/tile/tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart'; 
 TileComponents<Event> get multiDayBodyComponents {
-  const margin = EdgeInsets.symmetric(horizontal: 1);
-  const titlePadding = EdgeInsets.all(8);
+  const margin = EdgeInsets.symmetric(horizontal: 0);
+  const titlePadding = EdgeInsets.all(0);
   return TileComponents(
     tileBuilder: (event, tileRange) => EventTile(event: event, margin: margin, titlePadding: titlePadding),
     dropTargetTile: (event) => DropTargetTile(event: event, margin: margin),
@@ -18,8 +18,8 @@ TileComponents<Event> get multiDayBodyComponents {
 }
 
 TileComponents<Event> get multiDayHeaderTileComponents {
-  const margin = EdgeInsets.symmetric(vertical: 1);
-  const titlePadding = EdgeInsets.symmetric(vertical: 1, horizontal: 8);
+  const margin = EdgeInsets.symmetric(vertical: 0);
+  const titlePadding = EdgeInsets.symmetric(vertical: 0, horizontal: 0);
   return TileComponents(
     tileBuilder: (event, tileRange) => EventTile(event: event, margin: margin, titlePadding: titlePadding),
     dropTargetTile: (event) => DropTargetTile(event: event, margin: margin),
@@ -31,8 +31,8 @@ TileComponents<Event> get multiDayHeaderTileComponents {
 }
 
 ScheduleTileComponents<Event> get scheduleTileComponents {
-  const margin = EdgeInsets.symmetric(vertical: 1);
-  const titlePadding = EdgeInsets.all(8);
+  const margin = EdgeInsets.symmetric(vertical: 0);
+  const titlePadding = EdgeInsets.all(0);
   return ScheduleTileComponents(
     tileBuilder: (event, tileRange) => EventTile(event: event, margin: margin, titlePadding: titlePadding),
     dropTargetTile: (event) => DropTargetTile(event: event, margin: margin),

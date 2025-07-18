@@ -33,7 +33,7 @@ class _VerticalResizeHandleState extends State<VerticalResizeHandle> {
         margin: margin,
         decoration: BoxDecoration(
           color: hovering ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );
@@ -73,7 +73,7 @@ class _HorizontalResizeHandleState extends State<HorizontalResizeHandle> {
         margin: margin,
         decoration: BoxDecoration(
           color: hovering ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );

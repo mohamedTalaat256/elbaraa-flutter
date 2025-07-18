@@ -72,7 +72,7 @@ class DropTargetTile extends Tile {
       margin: margin,
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
       ),
     );
   }

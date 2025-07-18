@@ -1,27 +1,22 @@
+import 'dart:io';
+
 import 'package:elbaraa/presentation/screens/calendar/data/event.dart';
-import 'package:elbaraa/presentation/screens/calendar/widgets/calendar_widget.dart';
 import 'package:elbaraa/presentation/screens/calendar/widgets/overlay_card.dart';
+import 'package:elbaraa/presentation/screens/calendar/widgets/tile_components.dart';
+import 'package:elbaraa/presentation/screens/calendar/widgets/zoom.dart';
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart';
+import 'package:localization/localization.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
-
-  static _CalendarScreenState? of(BuildContext context) =>
-      context.findAncestorStateOfType<_CalendarScreenState>();
-
-  static EventsController<Event> eventsController(BuildContext context) =>
-      of(context)!.eventsController;
-  static List<ViewConfiguration> views(BuildContext context) =>
-      of(context)!.viewConfigurations;
-
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  final eventsController = DefaultEventsController<Event>();
 
+  final eventsController = DefaultEventsController<Event>();
   final controller1 = CalendarController<Event>();
   late final viewConfiguration1 = ValueNotifier(viewConfigurations[1]);
 
@@ -34,7 +29,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   late final callbacks = CalendarCallbacks<Event>(
     onEventTapped: (event, renderBox) => createOverlay(event, renderBox),
-    onEventCreate: (event) => event.copyWith(data: const Event(title: 'New Event')),
+    onEventCreate: (event) => event.copyWith(data: Event(title: 'New Event')),
     onEventCreated: (event) => eventsController.addEvent(event),
     onTapped: (date) {
       eventsController.addEvent(
@@ -57,11 +52,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     },
   );
 
+
+  @override
+  void initState() {
+    super.initState();
+    addWeeklyRecurringEvent(  DateTime.now(),   10);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Kalender Demo"),
+        title: Text('week_calendar'.i18n()),
         backgroundColor: Theme.of(context).colorScheme.surface,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
         elevation: 2,
@@ -77,11 +79,142 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: OverlayPortal(
         controller: portalController,
         overlayChildBuilder: buildOverlay,
-        child: CalendarWidget(
-          controller: controller1,
-          view: viewConfiguration1,
-          callbacks: callbacks,
-        ),
+        child: ValueListenableBuilder(
+          valueListenable: viewConfiguration1,
+          builder: (context, value, child) {
+            return CalendarView<Event>(
+              eventsController: eventsController,
+              calendarController: controller1,
+              viewConfiguration: value,
+              callbacks: callbacks,
+              header: Material(
+                color: Theme.of(context).colorScheme.surface,
+                surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+                elevation: 2,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ValueListenableBuilder(
+                            valueListenable:
+                                controller1.visibleDateTimeRangeUtc,
+                            builder: (context, value, child) {
+                              final String month;
+                              final int year;
+
+                              if (controller1.viewController?.viewConfiguration
+                                  is MonthViewConfiguration) {
+                                final secondWeek = value.start.addDays(7);
+                                year = secondWeek.year;
+                                month = secondWeek.monthNameLocalized();
+                              } else {
+                                year = value.start.year;
+                                month = value.start.monthNameLocalized();
+                              }
+
+                              return FilledButton.tonal(
+                                onPressed: () {},
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(
+                                    150,
+                                    kMinInteractiveDimension,
+                                  ),
+                                ),
+                                child: Text('$month $year'),
+                              );
+                            },
+                          ),
+                          if (!Platform.isAndroid && !Platform.isIOS) ...[
+                            const SizedBox(width: 4),
+                            IconButton.filledTonal(
+                              onPressed: () async {
+                                await controller1.animateToPreviousPage();
+                              },
+                              icon: const Icon(Icons.navigate_before),
+                            ),
+                          ],
+                          if (!Platform.isAndroid && !Platform.isIOS) ...[
+                            const SizedBox(width: 4),
+                            IconButton.filledTonal(
+                              onPressed: () {
+                                controller1.animateToNextPage();
+                              },
+                              icon: const Icon(Icons.navigate_next),
+                            ),
+                          ],
+                          const SizedBox(width: 4),
+                          IconButton.filledTonal(
+                            onPressed: () {
+                              controller1.animateToDate(DateTime.now());
+                            },
+                            icon: const Icon(Icons.today),
+                          ),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                DropdownMenu(
+                                  dropdownMenuEntries:
+                                      viewConfigurations.map((e) {
+                                        return DropdownMenuEntry(
+                                          value: e,
+                                          label: e.name,
+                                        );
+                                      }).toList(),
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        kMinInteractiveDimension,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        kMinInteractiveDimension,
+                                      ),
+                                      borderSide: BorderSide(
+                                        width: 2,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.outline,
+                                      ),
+                                    ),
+                                  ),
+                                  initialSelection: viewConfiguration1.value,
+                                  onSelected: (value) {
+                                    if (value == null) return;
+                                    viewConfiguration1.value = value;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    CalendarHeader(
+                      multiDayTileComponents: multiDayHeaderTileComponents,
+                    ),
+                  ],
+                ),
+              ),
+              body: CalendarZoomDetector(
+                controller: controller1,
+                child: CalendarBody(
+                  multiDayTileComponents: multiDayBodyComponents,
+                  monthTileComponents: multiDayHeaderTileComponents,
+                  scheduleTileComponents: scheduleTileComponents,
+                ),
+              ),
+            );
+          },
+        )
       ),
     );
   }
@@ -144,4 +277,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ],
     );
   }
+
+  void addWeeklyRecurringEvent( DateTime fromDate, int weeksCount, ) {
+     
+      DateTime nextMonday = fromDate.weekday == DateTime.monday
+          ? fromDate
+          : fromDate.add(Duration(days: 0));
+
+      for (int i = 0; i < weeksCount; i++) {
+        final start = DateTime(
+          nextMonday.year,
+          nextMonday.month,
+          nextMonday.day,
+          14, // 2 PM
+        ).add(Duration(days: i * 7));
+
+        final end = start.add(Duration(hours: 5)); // 3 PM
+
+        eventsController.addEvent(
+          CalendarEvent(
+            dateTimeRange: DateTimeRange(start: start, end: end),
+            data: const Event(title: '', color: Colors.amber),
+          ),
+        );
+      }
+    }
 }
