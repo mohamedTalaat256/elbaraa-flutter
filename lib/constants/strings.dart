@@ -48,6 +48,7 @@ const String editProfileScreen = '/edit_profile_screen';
 const String productDetailsScreen = '/product_details_screen';
 const String chatMessagesScreen = '/chat_messages_screen';
 const String splashScreen = '/';
+const String subscripToPlanScreen = '/subscrip_to_plan_screen';
 
 
 

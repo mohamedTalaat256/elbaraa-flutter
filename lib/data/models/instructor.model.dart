@@ -1,4 +1,7 @@
+import 'package:elbaraa/data/models/unavailableTime.model.dart';
+
 class Instructor {
+  final int id;
   final String firstName;
   final String lastName;
   final String country;
@@ -7,9 +10,10 @@ class Instructor {
   final int age;
   final String gender;
   final String jobTitle;
-
+  final List<UnavailableTime> unavailableTimes;
 
   Instructor({
+    required this.id,
     required this.firstName,
     required this.lastName,
     required this.country,
@@ -18,22 +22,29 @@ class Instructor {
     required this.age,
     required this.gender,
     required this.jobTitle,
+    required this.unavailableTimes,
   });
 
   factory Instructor.fromJson(Map<String, dynamic> json) {
     return Instructor(
+      id: json['id'] ?? 0,
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
       country: json['country'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       education: json['education'] ?? '',
-      age: json['age'] ?? '',
+      age: json['age'] ?? 0,
       gender: json['gender'] ?? '',
       jobTitle: json['jobTitle'] ?? '',
+      unavailableTimes: (json['unavailableTimes'] as List<dynamic>?)
+              ?.map((e) => UnavailableTime.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'firstName': firstName,
         'lastName': lastName,
         'country': country,
@@ -42,5 +53,6 @@ class Instructor {
         'age': age,
         'gender': gender,
         'jobTitle': jobTitle,
+        'unavailableTimes': unavailableTimes.map((e) => e.toJson()).toList(),
       };
 }

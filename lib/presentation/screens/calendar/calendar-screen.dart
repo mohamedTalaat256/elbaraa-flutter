@@ -1,5 +1,7 @@
 import 'package:elbaraa/data/business_logic/session/session_cubit.dart';
 import 'package:elbaraa/data/business_logic/session/session_state.dart';
+import 'package:elbaraa/data/models/MeetingDataSource.dart';
+import 'package:elbaraa/data/models/meeting.model.dart';
 import 'package:elbaraa/data/models/session.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -111,6 +113,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         session.subscription!.plan!.title,
         DateTime.parse(session.start!),
         DateTime.parse(session.end!),
+        false
       );
     }).toList();
   }
@@ -134,6 +137,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   _titleController.text,
                   selectedDate,
                   selectedDate.add(const Duration(hours: 1)),
+                  false
                 );
 
                 setState(() {
@@ -205,41 +209,4 @@ class _CalendarScreenState extends State<CalendarScreen> {
   );
 }
 
-class MeetingDataSource extends CalendarDataSource {
-  MeetingDataSource(List<Meeting> source) {
-    appointments = source;
-  }
 
-  @override
-  DateTime getStartTime(int index) {
-    return appointments![index].start;
-  }
-
-  @override
-  DateTime getEndTime(int index) {
-    return appointments![index].end;
-  }
-
-  @override
-  String getSubject(int index) {
-    return appointments![index].title;
-  }
-
-  @override
-  Color getColor(int index) {
-    return const Color.fromARGB(255, 37, 148, 221); //appointments![index].background;
-  }
-
-  @override
-  bool isAllDay(int index) {
-    return false; //appointments![index].isAllDay;
-  }
-}
-
-class Meeting {
-  Meeting(this.title, this.start, this.end);
-
-  String title;
-  DateTime start;
-  DateTime end;
-}

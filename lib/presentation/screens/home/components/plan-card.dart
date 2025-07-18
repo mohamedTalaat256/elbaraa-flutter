@@ -35,7 +35,7 @@ class PlanCard extends StatelessWidget {
             ),
             SizedBox(height: 10.0),
             Text(
-              'شهريا / EGP 375',
+              '${'monthly'.i18n()} / ${plan.currency} ${plan.planCost}',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20.0,
@@ -73,8 +73,16 @@ class PlanCard extends StatelessWidget {
               // Center the button
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle subscription button press
-                  print('اشترك button pressed!');
+                   Navigator.of(context).pushNamed(
+                              subscripToPlanScreen,
+                              arguments: plan.id,
+                            );
+                  /* Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SupscripToPlanScreen(planId: plan.id),
+                    ),
+                  ); */
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFD4AF37), // Gold button color
