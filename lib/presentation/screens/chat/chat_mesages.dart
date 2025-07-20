@@ -168,7 +168,7 @@ class _ChatMessagesScreenState extends State<ChatMessagesScreen> {
                 width: 2,
               ),
               CircleAvatar(
-                backgroundImage: NetworkImage(user.imageUrl!),
+                backgroundImage: NetworkImage(user.imageUrl),
                 maxRadius: 20,
               ),
               SizedBox(
@@ -180,7 +180,7 @@ class _ChatMessagesScreenState extends State<ChatMessagesScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      user.firstName!,
+                      user.firstName,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),

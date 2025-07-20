@@ -22,24 +22,6 @@ class AuthRepository {
     return response.data;
   }
 
-  myProfile() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-
-    int? userId = await sharedPreferences.getInt('userid');
-
-    Response response = await dio.get('my_profile?id=' + userId.toString());
-
-   /*  User user = User(
-        id: response.data['id'].toString(),
-        email: response.data['email'],
-        firstName: response.data['firstName'],
-        imageUrl: response.data['imageUrl'],
-        phone: response.data['phone'],
-        online: response.data['active_staus']); */
-
-    return null;
-  }
-
   uploadProfileImage(FormData data) async {
     int? userId = await sharedPreferences.getInt('userid');
     try {

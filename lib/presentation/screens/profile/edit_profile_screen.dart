@@ -4,13 +4,9 @@ import 'package:elbaraa/data/business_logic/profile/profile_bloc.dart';
 import 'package:elbaraa/data/business_logic/profile/profile_cubit.dart';
 import 'package:elbaraa/data/models/user.dart';
 import 'package:elbaraa/presentation/screens/profile/image_helper.dart';
-import 'package:elbaraa/presentation/widgets/custome_button.dart';
 import 'package:elbaraa/presentation/widgets/custome_button_with_icon.dart';
-import 'package:elbaraa/presentation/widgets/custome_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key, required this.userInfo});
