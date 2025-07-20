@@ -55,6 +55,7 @@ dependencies:
   flutter_toggle_tab: ^1.5.1
   calendar_view: ^1.4.0
   kalender: ^0.10.2
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:

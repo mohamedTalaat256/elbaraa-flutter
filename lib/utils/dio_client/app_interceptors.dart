@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'package:elbaraa/constants/strings.dart';
 import 'package:elbaraa/data/models/requests/app_response.dart';
 import 'package:dio/dio.dart';
+import 'package:elbaraa/main.dart';
+import 'package:elbaraa/utils/snackbar_helper.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppInterceptors extends Interceptor {
@@ -13,10 +17,13 @@ class AppInterceptors extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
-   
+
     if (token != null && token.isNotEmpty) {
       options.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
     }
@@ -34,9 +41,29 @@ class AppInterceptors extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    return handler.next(err);
+    String errorMessage = getErrorMessage(err.type, err.response?.statusCode);
+    showGlobalSnackBar(errorMessage);
+
+    if (err.response?.statusCode == 401) {
+      final context = navigatorKey.currentContext;
+      if (context != null) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          loginScreen,
+          (Route<dynamic> route) => false,
+        );
+      }
+    } 
+    final responseData = mapResponseData(
+      requestOptions: err.requestOptions,
+      response: err.response,
+      customMessage: errorMessage,
+      isErrorResponse: true,
+    );
+
+    handler.resolve(responseData);
   }
 }
+
 String getErrorMessage(DioErrorType errorType, int? statusCode) {
   String errorMessage = "";
 
@@ -85,7 +112,7 @@ class DioErrorMessage {
   static const internalserverErrorException =
       "Unknown error occurred, please try again later.";
   static const conflictException = "Conflict occurred";
-  static const unauthorizedException = "Access denied";
+  static const unauthorizedException = "Unauthenticated";
   static const notFoundException =
       "The requested information could not be found";
   static const unexpectedException = "Unexpected error occurred.";
@@ -107,7 +134,7 @@ Response<dynamic> mapResponseData({
   if (hasResponseData) {
     responseData!.addAll({
       "statusCode": response?.statusCode,
-      "statusMessage": response?.statusMessage
+      "statusMessage": response?.statusMessage,
     });
   }
   return Response(

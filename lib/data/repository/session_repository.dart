@@ -10,28 +10,27 @@ class SessionRepository {
   SessionRepository() {
     dio = DioClient().instance;
   }
-
   Future<AppResponse<List<Session>>> getUserCalendar() async {
-    final prefs = await SharedPreferences.getInstance();
-    final role = prefs.getString('role');
-    var url = '';
-    if (role == 'INSTRUCTOR') {
-      url = '/instructor/calendar';
-    } else if (role == 'STUDENT') {
-      url = '/student/calendar';
-    }
-    Response response = await dio.get(url);
-    /*  return AppResponse<List<Session>>.fromJson(
-      response.data['sessions'],
-      (dynamic json) => json != null
-          ? (json as List<dynamic>).map((e) => Session.fromJson(e)).toList()
-          : [],
-    ); */
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final role = prefs.getString('role');
+      var url = '';
 
-    return AppResponse<List<Session>>.fromJson(response.data, (json) {
-      final sessions =
-          (json as Map<String, dynamic>)['sessions'] as List<dynamic>? ?? [];
-      return sessions.map((e) => Session.fromJson(e)).toList();
-    });
+      if (role == 'INSTRUCTOR') {
+        url = '/instructor/calendar';
+      } else if (role == 'STUDENT') {
+        url = '/student/calendar';
+      }
+
+      Response response = await dio.get(url);
+      return AppResponse<List<Session>>.fromJson(response.data, (json) {
+        final sessions =
+            (json as Map<String, dynamic>)['sessions'] as List<dynamic>? ?? [];
+        return sessions.map((e) => Session.fromJson(e)).toList();
+      });
+    } catch (e) {
+      // This will be caught by your interceptor, but added here for completeness
+      rethrow;
+    }
   }
 }

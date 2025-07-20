@@ -5,19 +5,18 @@ import 'package:elbaraa/data/business_logic/plan/plan_cubit.dart';
 import 'package:elbaraa/data/business_logic/plan/plan_state.dart';
 import 'package:elbaraa/data/business_logic/session/session_cubit.dart';
 import 'package:elbaraa/data/business_logic/session/session_state.dart';
-import 'package:elbaraa/data/models/UnavalableTimeDataSource.dart';
 import 'package:elbaraa/data/models/instructor.model.dart';
 import 'package:elbaraa/data/models/material.model.dart';
 import 'package:elbaraa/data/models/meeting.model.dart';
 import 'package:elbaraa/data/models/plan.model.dart';
 import 'package:elbaraa/data/models/session.model.dart';
 import 'package:elbaraa/data/models/unavailableTime.model.dart';
+import 'package:elbaraa/presentation/screens/subscrip-to-plan/supscrip-calendar.dart';
 import 'package:elbaraa/presentation/widgets/custome_text.dart';
 import 'package:elbaraa/utils/Calendar.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localization/localization.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class SupscripToPlanScreen extends StatefulWidget {
   final int planId;
@@ -114,45 +113,11 @@ class _SupscripToPlanScreenState extends State<SupscripToPlanScreen> {
             studentSessions = state.sessions;
             return SizedBox(
               height: MediaQuery.of(context).size.height * 0.72,
-              child: SfCalendar(
-                view: CalendarView.week,
-                firstDayOfWeek: 5,
-                dataSource: UnavalableTimeDataSource(
-                  mergeAllEvents(
+              child: SubscripCalendar(calendarEvents: mergeAllEventsNew(
                     studentSessions,
                     instructorSessions,
                     unavailableTimes,
-                  )),
-                
-                appointmentBuilder: (context, details) {
-                  final Appointment appointment = details.appointments.first;
-                  return Container(
-                    width: double
-                        .infinity, // This will apply within its allocated resource column
-                    decoration: BoxDecoration(
-                      color: appointment.color,
-                      borderRadius: BorderRadius.circular(0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Text(
-                        appointment.subject,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                  ))
             );
           } else {
             return Text("loading");

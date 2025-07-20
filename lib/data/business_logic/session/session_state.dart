@@ -17,6 +17,13 @@ class SessionsLoaded extends SessionState {
   List<Object> get props => [sessions];
 }
 
+class SessionError extends SessionState {
+  final String message;
+
+  SessionError(this.message);
+ 
+}
+
 
 class AuthStudentSessionsLoaded extends SessionState {
   final List<Session> sessions;
