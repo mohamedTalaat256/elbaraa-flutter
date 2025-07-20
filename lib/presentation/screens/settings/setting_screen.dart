@@ -1,7 +1,9 @@
+import 'package:elbaraa/data/business_logic/settings/app_settings_bloc.dart';
 import 'package:elbaraa/presentation/screens/settings/components/app_lang_dialog.dart';
 import 'package:elbaraa/presentation/screens/settings/components/app_theme_dialog.dart';
 import 'package:elbaraa/presentation/widgets/custome_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:localization/localization.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -14,10 +16,13 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: CustomScrollView(
-            physics:
-                BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: BlocBuilder<AppSettingsBloc, SettingsStateInitial>(
+        builder: (context, state) {
+          return CustomScrollView(
+            physics: BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             slivers: [
               SliverAppBar(
                 leading: IconButton(
@@ -67,18 +72,26 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                   ],
                 ),
-              )
-            ]));
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Future<String?> _changeAppThemDialog(BuildContext context) {
     return showDialog<String>(
-        context: context, builder: (BuildContext context) => AppThemeDialog());
+      context: context,
+      builder: (BuildContext context) => AppThemeDialog(),
+    );
   }
 
   Future<String?> _changeAppLangDialog(BuildContext context) {
     return showDialog<String>(
-        context: context, builder: (BuildContext context) => AppLangDialog());
+      context: context,
+      builder: (BuildContext context) => AppLangDialog(),
+    );
   }
 }
 
@@ -104,19 +117,18 @@ class ProfileMenueItem extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
           decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(8)),
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: <Widget>[
                   Container(
-                      padding: EdgeInsets.all(6),
-                      child: Icon(
-                        icon,
-                        color: iconColor,
-                      )),
+                    padding: EdgeInsets.all(6),
+                    child: Icon(icon, color: iconColor),
+                  ),
                   SizedBox(width: 6),
                   CustomeText(
                     text: text,
@@ -132,7 +144,7 @@ class ProfileMenueItem extends StatelessWidget {
                   Icons.arrow_forward_ios_rounded,
                   color: Theme.of(context).primaryColor,
                 ),
-              )
+              ),
             ],
           ),
         ),

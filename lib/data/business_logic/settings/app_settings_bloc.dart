@@ -9,10 +9,12 @@ part 'app_settings_state.dart';
 
 class AppSettingsBloc extends Bloc<AppSettingsEvent, SettingsStateInitial> {
   AppSettingsBloc()
-      : super(SettingsStateInitial(
+    : super(
+        SettingsStateInitial(
           themeData: AppThemeData[AppTheme.DarkTheme]!,
           local: const Locale('en', 'US'),
-        )) {
+        ),
+      ) {
     on<GetCurrentSettingsEvent>((event, emit) async {
       final sp = await SharedPreferences.getInstance();
       String? currentTheme = sp.getString('app_theme');
@@ -24,10 +26,15 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, SettingsStateInitial> {
 
       final themeData = AppThemeData[theme]!;
 
-      emit(SettingsStateInitial(
-        themeData: themeData,
-        local: Locale(currentLang.substring(0, 2), currentLang.substring(3, 5)),
-      ));
+      emit(
+        SettingsStateInitial(
+          themeData: themeData,
+          local: Locale(
+            currentLang.substring(0, 2),
+            currentLang.substring(3, 5),
+          ),
+        ),
+      );
     });
 
     on<ThemeChanged>((event, emit) async {
@@ -36,25 +43,39 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, SettingsStateInitial> {
 
       String? currentLang = sp.getString('app_lang') ?? 'ar_EG';
 
-      emit(SettingsStateInitial(
-        themeData: AppThemeData[event.theme]!,
-        local: Locale(currentLang.substring(0, 2), currentLang.substring(3, 5)),
-      ));
+      emit(
+        SettingsStateInitial(
+          themeData: AppThemeData[event.theme]!,
+          local: Locale(
+            currentLang.substring(0, 2),
+            currentLang.substring(3, 5),
+          ),
+        ),
+      );
     });
 
     on<langChanged>((event, emit) async {
       final sp = await SharedPreferences.getInstance();
-      await sp.setString('app_lang', '${event.local.languageCode}_${event.local.countryCode}');
+      await sp.setString(
+        'app_lang',
+        '${event.local.languageCode}_${event.local.countryCode}',
+      );
 
       String? currentTheme = sp.getString('app_theme');
       final theme = currentTheme == AppTheme.DarkTheme.name
           ? AppTheme.DarkTheme
           : AppTheme.LightTheme;
 
-      emit(SettingsStateInitial(
-        themeData: AppThemeData[theme]!,
-        local: event.local,
-      ));
+      print(
+        'Language Changed: ${event.local.languageCode}_${event.local.countryCode}',
+      ); // Debugging
+
+      emit(
+        SettingsStateInitial(
+          themeData: AppThemeData[theme]!,
+          local: event.local,
+        ),
+      );
     });
   }
 }

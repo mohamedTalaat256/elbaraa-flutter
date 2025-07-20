@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 
-enum AppTheme{
+enum AppTheme {
   LightTheme,
-  DarkTheme
+  DarkTheme,
 }
-
 
 const MaterialColor white = const MaterialColor(
   0xFFFFFFFF,
@@ -24,27 +23,19 @@ const MaterialColor white = const MaterialColor(
   },
 );
 
-
-
-final AppThemeData = {
+final Map<AppTheme, ThemeData> AppThemeData = {
   AppTheme.LightTheme: ThemeData(
-    primarySwatch: white,
-    primaryColor: Colors.black,
+    primaryColor: Colors.black, // Replace with valid primaryColor
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     dividerColor: Colors.white54,
-     fontFamily: 'Cairo', 
-    
-
+    fontFamily: 'Cairo', 
   ),
-
   AppTheme.DarkTheme: ThemeData(
-    primarySwatch: Colors.grey,
     primaryColor: Color.fromARGB(255, 255, 255, 255),
     brightness: Brightness.dark,
     scaffoldBackgroundColor: Color.fromARGB(255, 41, 41, 41),
-    
     dividerColor: Colors.black12,
-     fontFamily: 'Cairo', 
-  )
+    fontFamily: 'Cairo', 
+  ),
 };

@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: email,
                             decoration: InputDecoration(
-                              labelText: 'البريد الإلكتروني',
+                              labelText: 'email'.i18n(),
                               hintText: 'example@email.com',
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.email),
@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: password,
                             decoration: InputDecoration(
-                              labelText: 'كلمة المرور',
+                              labelText: 'password'.i18n(),
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.lock),
                             ),
@@ -130,18 +130,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   },
                                   borderRaduis: 6,
-                                  backgroundColor: Color.fromARGB(
-                                    255,
-                                    209,
-                                    84,
-                                    0,
-                                  ),
+                                  backgroundColor: kTextGreen,
                                   paddingAll: 8,
-                                  text: 'sign in',
+                                  text: 'login'.i18n(),
                                   textColor: Colors.white,
                                 ),
                           SizedBox(height: 10),
-                          CustomeText(text: '-OR-', color: Colors.grey),
+                          CustomeText(text: 'or'.i18n(), color: Colors.grey),
 
                            GestureDetector(
                           onTap: () {},

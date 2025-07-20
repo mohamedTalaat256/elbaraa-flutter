@@ -28,8 +28,10 @@ class InstructorCard extends StatelessWidget {
                 Column(
                   children: [
                     CustomeText(
-                      text: instructor.firstName,
+                      text: '${instructor.firstName} ${instructor.lastName}',
                       alignment: TextAlign.start,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                     CustomeText(
                       text: instructor.country,
